@@ -18,7 +18,7 @@ protected:
 
 public:
     File(const std::string& name);
-    File(const std::string& name, std::string& content);
+    File(const std::string& name, const std::string& content);
 
     const std::string& get_name() const;
     const std::string& get_symbol() const {return symbol;}

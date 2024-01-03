@@ -6,12 +6,11 @@
 #include <string>
 #include <map>
 
-#include <dirent.h> // for directory search
-
 // user includes
+#include "command_parser.hpp"
+#include "file_system.hpp"
 #include "memory_manager.hpp"
 #include "commands.hpp"
-#include "command_parser.hpp"
 #include "directory.hpp"
 
 class Shell {

@@ -22,12 +22,12 @@ private:
 
 public:
     static MemoryManager* get(); // returns the singleton object
-    void   allocate_file(std::string& name, std::string& content);
-    void   allocate_directory(std::string& path, std::string& name);
+    void   allocate_file(const std::string& name, const std::string& content);
+    void   allocate_directory(const std::string& path, const std::string& name);
 
     std::vector<File*> root;
 
-
+    // TODO Move into Shell class
     // TODO Seperate iterators for directories and files
     // Iterator class
     class Iterator {

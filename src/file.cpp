@@ -3,7 +3,7 @@
 File::File(const std::string& name) 
             : symbol("F"), name(name), date(get_timestamp()), content("") {}
 
-File::File(const std::string& name, std::string& content) 
+File::File(const std::string& name, const std::string& content) 
             : symbol("F"), name(name), date(get_timestamp()), content(content) {}
 
 // TODO Refactor into a separate class function

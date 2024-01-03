@@ -22,7 +22,9 @@ MemoryManager* MemoryManager::get() {
     return instance;
 }
 
-void MemoryManager::allocate_file(std::string& name, std::string& content) {
+void MemoryManager::allocate_file(const std::string& name, const std::string& content) {
+    // TODO check existence of the same file
+
     if (can_allocate(content.size())) {
         // create file object
         File* new_file = new File(name, content);
@@ -36,7 +38,9 @@ void MemoryManager::allocate_file(std::string& name, std::string& content) {
     }
 }
 
-void MemoryManager::allocate_directory(std::string& path, std::string& name) {
+void MemoryManager::allocate_directory(const std::string& path, const std::string& name) {
+    // TODO check existence of the same directory?
+
     if (path == "") {
         // root path
         // create directory object
