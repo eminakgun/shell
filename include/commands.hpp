@@ -43,4 +43,24 @@ public:
 };
 
 
+class LsCommand : public Command {
+private:
+    void _execute() override;
+    bool recursive;
+
+public:
+    LsCommand();
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
+class CatCommand : public Command {
+private:
+    File* file;
+    void _execute() override;
+
+public:
+    CatCommand();
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
 #endif

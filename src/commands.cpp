@@ -45,3 +45,47 @@ void CpCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     _dest = params[1];
     _execute();
 }
+
+// Ls Command
+LsCommand::LsCommand() : recursive(false) {}
+
+void LsCommand::_execute() {
+    
+    // Iterate over directory and files
+    //shell.current_dir
+    
+    recursive = false; // clear
+}
+
+void LsCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    if (params.size() >= 1) {
+        // TODO Recursive
+        bool recursive = params[0] == "-R";
+
+        if (recursive){
+        }
+        else {
+            throw std::invalid_argument("Expecting 1 parameter but found :" + 
+                                            std::to_string(params.size()));
+        }
+    }
+    _execute();
+}
+
+
+// Cat Command
+
+CatCommand::CatCommand() {}
+
+void CatCommand::_execute() {
+    // dump characters through the File iterator
+    for (auto &&i : *file) {
+        std::cout << i;
+    }
+    std::cout << std::endl;
+}
+
+void CatCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    file = shell.find_file(params[0]);
+    _execute();
+}
