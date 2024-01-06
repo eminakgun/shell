@@ -28,6 +28,11 @@ public:
     void execute_command(Command& cmd);
     void execute_command(const std::string& input);
     void flush() const;
+
+    File* find_file(const std::string& path);
+
+
+    friend class Command;
 };
 
 #endif

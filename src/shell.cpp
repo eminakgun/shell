@@ -5,6 +5,8 @@ Shell::Shell() : current_dir(Directory("root")) {
     commands["cd"] = nullptr;
     commands["mkdir"] = nullptr;
     commands["cp"] = new CpCommand();
+    commands["ls"] = new LsCommand();
+    commands["cat"] = new CatCommand();
     boot();
 }
 
@@ -78,4 +80,38 @@ void Shell::flush() const {
         }
         
     }
+}
+
+File* Shell::find_file(const std::string& path) {
+    File* file = nullptr;
+    char delimiter = '/';
+    std::string tmp = "";
+    std::vector<std::string> parts;
+
+    // refactor a function
+    std::istringstream iss(path);
+    while(std::getline(iss, tmp, delimiter)) {
+        parts.push_back(tmp);
+    }
+    
+    std::cout << "splitted path: " << std::endl;
+    for (auto &&i : parts)
+    {
+        std::cout << i << ", ";
+    }
+    std::cout << std::endl;
+    
+
+    for (auto &&i : memory_manager->root) {
+        if (i->get_name() == path) {
+            file = i;
+        }
+    }
+
+    if (file == nullptr)
+    {
+        /* TODO Throw exception*/
+    }
+    
+    return file;
 }
