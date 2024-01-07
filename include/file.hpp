@@ -20,9 +20,9 @@ public:
     File(const std::string& name);
     File(const std::string& name, const std::string& content);
 
-    const std::string& get_name() const;
+    const std::string& get_name() const {return name;};
     const std::string& get_symbol() const {return symbol;}
-    const std::string& get_content() const;
+    const std::string& get_content() const {return content;};
     const void dump() const;
     friend std::ostream& operator<<(std::ostream& os, const File& f);
 

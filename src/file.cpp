@@ -19,14 +19,6 @@ std::string File::get_timestamp() {
     return ss.str();
 }
 
-const std::string& File::get_name() const {
-    return name;
-}
-
-const std::string& File::get_content() const {
-    return content;
-}
-
 const void File::dump() const {
     // i.e cat command
     std::cout << content << std::endl;

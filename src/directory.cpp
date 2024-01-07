@@ -1,6 +1,9 @@
 #include "directory.hpp"
 
+void Directory::add_file(File* file) {
+    files.push_back(file);
+}
 
-Directory::Directory(const std::string& name) : File(name) {
-    symbol = "D";
+void Directory::add_subdir(Directory* dir) {
+    childs.push_back(dir);
 }
