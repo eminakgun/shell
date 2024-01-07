@@ -2,11 +2,12 @@
 
 Shell::Shell() : current_dir(Directory("")) {
     commands["exit"] = new ExitCommand();
-    commands["cd"] = nullptr;
-    commands["mkdir"] = nullptr;
     commands["cp"] = new CpCommand();
     commands["ls"] = new LsCommand();
     commands["cat"] = new CatCommand();
+    commands["cd"] = new CdCommand();
+    commands["mkdir"] = new MkdirCommand();
+    commands["mm"] = new MMCommand();
     boot();
 }
 
@@ -47,6 +48,19 @@ void Shell::load_from_directory(Directory* dir) {
         load_from_directory(alloc);
     }
 
+}
+
+void Shell::interactive() {
+    while (true) {
+        std::cout << current_dir.get_name() << " > ";
+        std::string input;
+        std::getline(std::cin, input);
+        try {
+            execute_command(input);
+        } catch (const std::invalid_argument& e) {
+            std::cerr << "Error: " << e.what() << std::endl;
+        }
+    }
 }
 
 void Shell::add_command(const std::string& name, Command* cmd) {

@@ -21,6 +21,7 @@ public:
     File(const std::string& name, const std::string& content);
 
     const std::string& get_name() const {return name;};
+    const std::string& get_date() const {return date;};
     const std::string& get_symbol() const {return symbol;}
     const std::string& get_content() const {return content;};
     const void dump() const;

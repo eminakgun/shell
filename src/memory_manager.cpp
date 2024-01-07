@@ -51,6 +51,15 @@ Directory* MemoryManager::allocate_directory(const std::string& name, const std:
     total_size += sizeof(dir);
     std::cout << "Directory size: " << sizeof(dir) << std::endl;
     std::cout << "Total size: " << total_size << std::endl;
-    return dir;
-    
+    return dir;   
+}
+
+void MemoryManager::list_entries() {
+    std::cout << "MemoryManager::list_entries" << std::endl;
+    for (const auto &i : entries) {
+        File* file = i.second;
+        std::cout << file->get_symbol() << "  " 
+                  << file->get_date()   << "  " 
+                  << file->get_name() << std::endl;
+    }
 }

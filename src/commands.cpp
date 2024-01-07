@@ -47,6 +47,22 @@ void CpCommand::execute(Shell& shell, const std::vector<std::string>& params) {
 }
 
 // Ls Command
+void LsCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    if (params.size() >= 1) {
+        bool recursive = params[0] == "-R";
+    }
+    current_dir = shell.get_current_dir();
+    _execute();
+    recursive = false; // clear
+}
+
+void LsCommand::execute(Shell& shell, const bool recursive) {
+    this->recursive = recursive;
+    current_dir = shell.get_current_dir();
+    _execute();
+    this->recursive = false;
+}
+
 void LsCommand::_execute() {
     _list_directory(current_dir);
 }
@@ -69,22 +85,6 @@ void LsCommand::_list_directory(const Directory* dir) const {
     }
 }
 
-void LsCommand::execute(Shell& shell, const bool recursive) {
-    this->recursive = recursive;
-    current_dir = shell.get_current_dir();
-    _execute();
-}
-
-void LsCommand::execute(Shell& shell, const std::vector<std::string>& params) {
-    if (params.size() >= 1) {
-        bool recursive = params[0] == "-R";
-    }
-    current_dir = shell.get_current_dir();
-    _execute();
-    recursive = false; // clear
-}
-
-
 // Cat Command
 
 CatCommand::CatCommand() {}
@@ -99,6 +99,7 @@ void CatCommand::_execute() {
         std::cout << "loop file: " << cfile->get_name()<< std::endl;
         if (cfile->get_name() == fname) {
             file = cfile;
+            break;
         }
     }
 
@@ -129,6 +130,63 @@ void CatCommand::execute(Shell& shell, const std::vector<std::string>& params) {
 }
 
 // TODO Implement Cd
-// TODO Implement Mkdir
+void CdCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    dname = params[0];
+    found_dir = nullptr;
+    current_dir = shell.get_current_dir();
+    _execute();
+
+    if (found_dir != nullptr) {        
+        shell.set_current_dir(found_dir);
+    }
+}
+
+void CdCommand::_execute() {
+    std::cout << "search dir: " << current_dir->get_full_path() << std::endl;
+    std::cout << "search name: " << dname << std::endl;
+
+    if (dname == "."){
+        /* stays the same */
+    }
+    else if (dname == "..") {
+        /* go upper */
+        // FIXME 
+        found_dir = current_dir->get_parent();
+        std::cout << "Cd file: " << found_dir->get_name() << std::endl;
+    }
+    else {
+        for (const auto& ddir: *(current_dir)) // Use directory iterator
+            if (ddir->get_name() == dname) {
+                found_dir = const_cast<Directory*>(ddir);
+                break;
+            }
+        if (found_dir == nullptr){
+            throw std::invalid_argument("Directory not found: " + dname);
+        } else
+            std::cout << "Cd file: " << found_dir->get_name() << std::endl;
+    }
+    //current_dir = dir; // assign pointer
+}
+
 // TODO Implement rm
 // TODO Implement link
+
+// TODO Implement Mkdir
+void MkdirCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    dname = params[0];
+    current_dir = shell.get_current_dir();
+    _execute();
+}
+
+void MkdirCommand::_execute() {
+    std::string full_path = current_dir->get_full_path();
+    MemoryManager* mm = MemoryManager::get();
+    Directory* alloc = mm->allocate_directory(dname, full_path + "/" + dname);
+    current_dir->add_subdir(alloc);
+}
+
+
+// Utility
+void MMCommand::_execute() {
+    MemoryManager::get()->list_entries();
+}

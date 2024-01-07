@@ -33,14 +33,15 @@ private:
 
 public:
     Shell();
+    void interactive();
 
     void add_command(const std::string& name, Command* cmd);
     void execute_command(Command& cmd);
     void execute_command(const std::string& input);
     void flush();
 
-
     Directory* get_current_dir() {return &current_dir;};
+    void set_current_dir(Directory* dir) {current_dir = *dir;};
     File* find_file(const std::string& path);
 
 

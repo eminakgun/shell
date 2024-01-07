@@ -63,6 +63,7 @@ public:
     void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
 
+
 class CatCommand : public Command {
 private:
     std::string fname;
@@ -71,6 +72,31 @@ private:
 public:
     CatCommand();
     void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
+
+class CdCommand : public Command {
+private:
+    std::string dname;
+    Directory* found_dir;
+    void _execute() override;
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
+class MkdirCommand : public Command {
+private:
+    std::string dname;
+    void _execute() override;
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
+class MMCommand : public Command {
+private:
+    void _execute() override;
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override {_execute();};
 };
 
 #endif

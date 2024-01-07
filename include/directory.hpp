@@ -8,24 +8,28 @@
 class Directory : public File
 {
 private:
+    Directory* parent;
     std::vector<File*> files;
     std::vector<Directory*> childs;
     std::string full_path;
 
 public:
-    Directory(const std::string& name) : File(name), full_path("") {symbol = "D";}
+    Directory(const std::string& name) 
+        : File(name), full_path(""), parent(nullptr)  {symbol = "D";}
     Directory(const std::string& name, const std::string& full_path) 
-        : File(name, "D"), full_path(full_path) {};
+        : File(name, "D"), full_path(full_path) , parent(nullptr) {symbol = "D";};
     
     void add_file(File* file);
     void add_subdir(Directory* dir);
     std::string& get_full_path() {return full_path;}
+    Directory* get_parent() {return parent;}
 
     // Iterator Interface
     class Iterator {
         private:
             //const std::vector<Directory*>& directories;
             typename std::vector<Directory*>::const_iterator current;
+            //typename std::vector<Directory*>::iterator current;
 
         public:
             // Iterator(const std::vector<Directory*>& directories) 
