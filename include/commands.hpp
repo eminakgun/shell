@@ -7,6 +7,8 @@
 
 // user includes
 #include "memory_manager.hpp"
+#include "file_system.hpp"
+//#include "shell.hpp"
 
 class Shell; // forward declaration
 
@@ -16,6 +18,9 @@ class Shell; // forward declaration
 class Command {
 private:
     virtual void _execute() = 0;
+
+protected:
+    Directory* current_dir;
 
 public:
     virtual void execute(Shell& shell);
@@ -48,14 +53,19 @@ private:
     void _execute() override;
     bool recursive;
 
+    void _list_directory(const Directory* dir) const;
+
 public:
-    LsCommand();
+    LsCommand() : recursive(false) {}
+    LsCommand(bool recursive) : recursive(recursive) {}
+
+    void execute(Shell& shell, const bool recursive=false);
     void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
 
 class CatCommand : public Command {
 private:
-    File* file;
+    std::string fname;
     void _execute() override;
 
 public:
