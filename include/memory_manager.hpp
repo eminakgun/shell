@@ -22,43 +22,12 @@ private:
 
 public:
     static MemoryManager* get(); // returns the singleton object
-    void   allocate_file(const std::string& name, const std::string& content);
-    void   allocate_directory(const std::string& path, const std::string& name);
+    
+    // Alloc/Dealloc
+    File*        allocate_file(const std::string& name, const std::string& content);
+    Directory*   allocate_directory(const std::string& name, const std::string& path);
 
-    std::vector<File*> root;
-
-    // TODO Move into Shell class
-    // TODO Seperate iterators for directories and files
-    // Iterator class
-    class Iterator {
-    private:
-        std::vector<File*>::iterator current;
-
-    public:
-        Iterator(std::vector<File*>::iterator iter) : current(iter) {}
-
-        // Overload operators to support iterator functionality
-        File* operator*() const {
-            return *current;
-        }
-
-        Iterator& operator++() {
-            ++current;
-            return *this;
-        }
-
-        bool operator!=(const Iterator& other) const {
-            return current != other.current;
-        }
-    };
-
-    Iterator begin() {
-        return Iterator(root.begin());
-    }
-
-    Iterator end() {
-        return Iterator(root.end());
-    }
+    std::map<std::string, File*> entries;
 };
 
 #endif

@@ -22,7 +22,7 @@ MemoryManager* MemoryManager::get() {
     return instance;
 }
 
-void MemoryManager::allocate_file(const std::string& name, const std::string& content) {
+File* MemoryManager::allocate_file(const std::string& name, const std::string& content) {
     // TODO check existence of the same file
 
     if (can_allocate(content.size())) {
@@ -30,31 +30,27 @@ void MemoryManager::allocate_file(const std::string& name, const std::string& co
         File* new_file = new File(name, content);
 
         // push it to our memory array
-        root.push_back(new_file);
+        entries[name] = new_file;
 
         // update allocated memory size
         total_size += new_file->size();
         std::cout << "Total size: " << total_size << std::endl;
+        return new_file;
     }
 }
 
-void MemoryManager::allocate_directory(const std::string& path, const std::string& name) {
+Directory* MemoryManager::allocate_directory(const std::string& name, const std::string& path) {
     // TODO check existence of the same directory?
 
-    if (path == "") {
-        // root path
-        // create directory object
-        Directory* dir = new Directory(name);
+    // create directory object
+    Directory* dir = new Directory(name, path);
 
-        root.push_back(dir);
+    entries[name] = dir;
 
-        // update allocated memory size
-        total_size += sizeof(dir);
-        std::cout << "Directory size: " << sizeof(dir) << std::endl;
-        std::cout << "Total size: " << total_size << std::endl;
-    }
-    else {
-        // search given path
-    }
+    // update allocated memory size
+    total_size += sizeof(dir);
+    std::cout << "Directory size: " << sizeof(dir) << std::endl;
+    std::cout << "Total size: " << total_size << std::endl;
+    return dir;
     
 }
