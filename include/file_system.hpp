@@ -7,6 +7,7 @@
 #include <fstream>
 
 // OS package
+#include <unistd.h> // for symlink
 #include <dirent.h> // for directory search
 
 using std::string;
@@ -24,24 +25,6 @@ using std::vector;
 // Currently uses regular OS tasks
 class FileSystemHandler {
 public:
-    static vector<string> list_files(const string& folder_path) {
-        vector<string> files;
-
-        // Reference https://stackoverflow.com/questions/13129340/recursive-function-for-listing-all-files-in-sub-directories
-        if (auto dir = opendir(folder_path.c_str())) {
-            while (auto f = readdir(dir)) {
-                auto dir_name = std::string(f->d_name);
-                auto d_type = f->d_type;
-                if (d_type == DT_REG)
-                    files.push_back(dir_name);
-            }
-        }
-
-        if (files.empty())
-            throw std::invalid_argument("No files found in directory: " + folder_path);
-        
-        return files;
-    }
 
     static string read_file(const string& file_path) {
         std::ifstream src_file(file_path);
@@ -67,6 +50,54 @@ public:
         ofs.close();
     }
 
+    static void create_symlink(const string& src, const string& target) {
+        symlink(src.c_str(), target.c_str());
+    }
+    
+    static string read_symlink(const string& path) {
+        char buf[256];
+        ssize_t len = readlink(path.c_str(), buf, sizeof(buf) - 1);
+        if (len != -1) {
+            buf[len] = '\0';
+            std::cout << "Symbolic link points to: " << buf << std::endl;
+        }
+        return string(buf);
+    }
+
+    // Query functions
+    static vector<string> list_files(const string& folder_path) {
+        vector<string> files;
+
+        // Reference https://stackoverflow.com/questions/13129340/recursive-function-for-listing-all-files-in-sub-directories
+        if (auto dir = opendir(folder_path.c_str())) {
+            while (auto f = readdir(dir)) {
+                auto dir_name = std::string(f->d_name);
+                auto d_type = f->d_type;
+                if (d_type == DT_REG)
+                    files.push_back(dir_name);
+            }
+        }
+
+        /*if (files.empty())
+            throw std::invalid_argument("No files found in directory: " + folder_path);
+        */
+        return files;
+    }
+
+    static vector<string> list_symlink(const string& folder_path) {
+        vector<string> files;
+    
+        if (auto dir = opendir(folder_path.c_str())) {
+            while (auto f = readdir(dir)) {
+                auto dir_name = std::string(f->d_name);
+                auto d_type = f->d_type;
+                if (d_type == DT_LNK)
+                    files.push_back(dir_name);
+            }
+        }
+
+        return files;
+    }
 
     static vector<string> list_directories(const string& folder_path) {
         vector<string> dirs;

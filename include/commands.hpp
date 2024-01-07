@@ -84,6 +84,23 @@ public:
     void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
 
+class RmCommand : public Command {
+private:
+    std::string fname;
+    void _execute() override;
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
+class LinkCommand : public Command {
+private:
+    std::string _src;
+    std::string _dest;
+    void _execute() override;
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
+};
+
 class MkdirCommand : public Command {
 private:
     std::string dname;

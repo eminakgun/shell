@@ -29,6 +29,8 @@ public:
 
     virtual size_t size() {return content.size();}
 
+    friend class SymFile;
+
     // Iterator Interface for the file content
     class Iterator {
     private:
@@ -59,8 +61,24 @@ public:
     }
 
     Iterator end() const {
-        return Iterator(content, content.size() - 1);
+        return Iterator(content, content.size());
     }
+};
+
+class SymFile : public File {
+private:
+    const File* link;
+
+public:
+    SymFile(const std::string& name, const File* link) : File(name), link(link){}
+
+    const File* get_link() const {return link;}
+
+    // Override
+    const std::string& get_name()    const {return name;};
+    const std::string& get_date()    const {return link->date;};
+    const std::string& get_symbol()  const {return link->symbol;}
+    const std::string& get_content() const {return link->content;};
 };
 
 #endif

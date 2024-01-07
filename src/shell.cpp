@@ -7,6 +7,8 @@ Shell::Shell() : current_dir(Directory("")) {
     commands["cat"] = new CatCommand();
     commands["cd"] = new CdCommand();
     commands["mkdir"] = new MkdirCommand();
+    commands["link"] = new LinkCommand();
+    commands["rm"] = new RmCommand();
     commands["mm"] = new MMCommand();
     boot();
 }
@@ -36,6 +38,14 @@ void Shell::load_from_directory(Directory* dir) {
     for (const auto &entry : files){
         std::cout << "Allocate file: " << entry << std::endl;
         std:string content = FileSystemHandler::read_file(mount + dir_path + "/" + entry);
+        std::cout << "Content: " << content << std::endl;
+        File* alloc = memory_manager->allocate_file(entry, content);
+        dir->add_file(alloc);
+    }
+
+    for (const auto& entry : FileSystemHandler::list_symlink(mount + dir_path)){
+        std::cout << "Allocate file: " << entry << std::endl;
+        auto content = FileSystemHandler::read_symlink(mount + dir_path + "/" + entry);
         std::cout << "Content: " << content << std::endl;
         File* alloc = memory_manager->allocate_file(entry, content);
         dir->add_file(alloc);
@@ -80,12 +90,10 @@ void Shell::execute_command(const std::string& input) {
     } else {
         std::cout << "Command not found: " << parsed_cmd.first << std::endl;
     }
-    
-    
 }
 
 void Shell::flush() {
-    
+    // TODO Remove all existing files first
     for (auto iter = root["root"]->fbegin(); iter != root["root"]->fend(); ++iter) {
         auto file = *iter;
         if ("F" == file->get_symbol()) {

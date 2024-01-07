@@ -25,6 +25,7 @@ CpCommand::CpCommand(std::string src, std::string dest) : _src(src), _dest(dest)
 void CpCommand::_execute() {
     // TODO check if source is outside of our file system
     // check if it exists
+    // TODO Add directory copy
 
     std::cout << _src << std::endl;
     std::string content = FileSystemHandler::read_file(_src);
@@ -90,7 +91,7 @@ void LsCommand::_list_directory(const Directory* dir) const {
 CatCommand::CatCommand() {}
 
 void CatCommand::_execute() {
-    const File* file = nullptr;
+    File* file = nullptr;
 
     std::cout << "search dir: " << current_dir->get_full_path() << std::endl;
     std::cout << "search name: " << fname << std::endl;
@@ -98,7 +99,7 @@ void CatCommand::_execute() {
         auto cfile = *iter;
         std::cout << "loop file: " << cfile->get_name()<< std::endl;
         if (cfile->get_name() == fname) {
-            file = cfile;
+            file = const_cast<File*>(cfile);
             break;
         }
     }
@@ -109,15 +110,18 @@ void CatCommand::_execute() {
     else
         std::cout << "Cat file: " << file->get_name() << std::endl;
 
-    // dump characters through the File iterator
-    /*for (auto &&i : *file) {
-        std::cout << i;
+    auto sym_file = dynamic_cast<const SymFile*>(file);
+    if (sym_file != nullptr) {
+        auto link = sym_file->get_link();
+        if (link != nullptr){
+            for (const auto &i : *link)
+                std::cout << i;
+        }
     }
-    */
-
-   file->dump();
-    for (auto it = file->begin(); it != file->end(); ++it) {
-        std::cout << *it;
+    else {
+        std::cout << "regular file" << std::endl;
+        for (auto it = file->begin(); it != file->end(); ++it)
+            std::cout << *it;
     }
 
     std::cout << std::endl;
@@ -169,9 +173,48 @@ void CdCommand::_execute() {
 }
 
 // TODO Implement rm
-// TODO Implement link
+void RmCommand::execute(Shell& shell, const std::vector<std::string>& params){
+    fname = params[0];
+    current_dir = shell.get_current_dir();
+    _execute();
+}
+void RmCommand::_execute(){
+    // delete the given file in current directory
+    File* file;
+    for (auto iter = current_dir->fbegin(); iter != current_dir->fend(); ++iter) {
+        auto cfile = *iter;
+        if (cfile->get_name() == fname) {
+            file = const_cast<File*>(cfile);
+            break;
+        }
+    }
+    current_dir->delete_file(file);
+    MemoryManager::get()->deallocate(file);
+}
 
-// TODO Implement Mkdir
+
+void LinkCommand::execute(Shell& shell, const std::vector<std::string>& params){
+    _src = params[0];
+    _dest = params[1];
+    current_dir = shell.get_current_dir();
+    _execute();
+};
+
+void LinkCommand::_execute() {
+    // Find source file
+    File* sfile;
+    for (auto iter = current_dir->fbegin(); iter != current_dir->fend(); ++iter) {
+        sfile = const_cast<File*>(*iter);
+        if (sfile->get_name() == _src)
+            break;
+    }
+
+    MemoryManager* mm = MemoryManager::get();
+    auto symfile = mm->allocate_symfile(_dest, sfile);
+    current_dir->add_file(symfile);
+};
+
+
 void MkdirCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     dname = params[0];
     current_dir = shell.get_current_dir();
@@ -179,6 +222,7 @@ void MkdirCommand::execute(Shell& shell, const std::vector<std::string>& params)
 }
 
 void MkdirCommand::_execute() {
+    // TODO Check existence of given dname, delete if exists
     std::string full_path = current_dir->get_full_path();
     MemoryManager* mm = MemoryManager::get();
     Directory* alloc = mm->allocate_directory(dname, full_path + "/" + dname);
