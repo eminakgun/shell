@@ -12,6 +12,8 @@
 using std::string;
 using std::vector;
 
+#include "file.hpp"
+
 
 // TODO
 // - move func implementations to .cpp file
@@ -54,6 +56,17 @@ public:
         return content;
     }
 
+    static void write_file(const File* file, const string&& file_path) {
+        std::ofstream ofs(file_path);
+        if (!ofs.is_open()) {
+            throw std::invalid_argument("Error opening input file: " + file_path);
+        }
+
+        std::cout << "Flush file: " << file->get_name() << std::endl;
+        ofs << file->get_content();
+        ofs.close();
+    }
+
 
     static vector<string> list_directories(const string& folder_path) {
         vector<string> dirs;
@@ -62,14 +75,12 @@ public:
             while (auto f = readdir(dir)) {
                 auto dir_name = std::string(f->d_name);
                 auto d_type = f->d_type;
-                // if (dir_name != "." && dir_name != "..") {
-                if (d_type == DT_DIR)
-                    dirs.push_back(dir_name);
+                if (dir_name != "." && dir_name != "..") {
+                    if (d_type == DT_DIR)
+                        dirs.push_back(dir_name);
+                }
             }
         }
-        
-        if (dirs.empty())
-            throw std::invalid_argument("No entries found in given path: " + folder_path);
         
         return dirs;
     }
