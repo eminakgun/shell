@@ -22,7 +22,7 @@ public:
     void add_file(File* file);
     void delete_file(File* file);
     void add_subdir(Directory* dir);
-    std::string& get_full_path() {return full_path;}
+    std::string get_full_path() const {return full_path;}
     Directory* get_parent() {return parent;}
 
     // Iterator Interface

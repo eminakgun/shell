@@ -22,14 +22,15 @@ private:
     std::map<std::string, Command*> commands;
     MemoryManager* memory_manager;
 
-    Directory current_dir;
+    Directory* current_dir;
     std::map<std::string, Directory*> root;
     
-    Directory* root_dir;
+    Directory root_dir;
 
     // Functions
     void boot();
     void load_from_directory(Directory* dir);
+    void _flush(const Directory* dir);
 
 public:
     Shell();
@@ -40,10 +41,8 @@ public:
     void execute_command(const std::string& input);
     void flush();
 
-    Directory* get_current_dir() {return &current_dir;};
-    void set_current_dir(Directory* dir) {current_dir = *dir;};
-    File* find_file(const std::string& path);
-
+    Directory* get_current_dir() {return current_dir;}
+    void set_current_dir(Directory* dir) {current_dir = dir;}
 
     friend class Command;
 };

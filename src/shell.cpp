@@ -1,6 +1,6 @@
 #include "shell.hpp"
 
-Shell::Shell() : current_dir(Directory("")) {
+Shell::Shell() : root_dir(Directory("root")) {
     commands["exit"] = new ExitCommand();
     commands["cp"] = new CpCommand();
     commands["ls"] = new LsCommand();
@@ -18,14 +18,27 @@ void Shell::boot() {
 
     // TODO check disk existence
     // TODO Include date information as well
-
-    root["root"] = &current_dir;
+    
+    current_dir = &root_dir;
+    root["root"] = &root_dir;
 
     // Iterate over the files and folders in the disk folder
     // and load it into memory space
     load_from_directory(root["root"]);
 
+    const char* banner = "===============================\n"
+                         "   _____ __         ____\n"
+                         "  / ___// /_  ___  / / /\n"
+                         "  \\__ \\/ __ \\/ _ \\/ / /\n"
+                         " ___/ / / / /  __/ / /\n"  
+                         "/____/_/ /_/\\___/_/_/\n"
+                         "===============================\n"
+                         "Boot completed successfully!\n";
+
+    std::cout << banner << "\t\t\t" << std::endl;
+                        
     // list recursively
+    std::cout << ">ls -R" << std::endl;
     dynamic_cast<LsCommand*>(commands["ls"])->execute(*this, true);
 }
 
@@ -62,7 +75,7 @@ void Shell::load_from_directory(Directory* dir) {
 
 void Shell::interactive() {
     while (true) {
-        std::cout << current_dir.get_name() << " > ";
+        std::cout << current_dir->get_name() << " > ";
         std::string input;
         std::getline(std::cin, input);
         try {
@@ -84,7 +97,7 @@ void Shell::execute_command(Command& cmd) {
 void Shell::execute_command(const std::string& input) {
     auto parsed_cmd = CommandParser::parse(input);
     auto it = commands.find(parsed_cmd.first); // get iterator
-
+    std::cout << current_dir->get_name() << " > " << input << std::endl;
     if (it != commands.end() && it->second != nullptr) {            
         it->second->execute(*this, parsed_cmd.second);
     } else {
@@ -93,8 +106,11 @@ void Shell::execute_command(const std::string& input) {
 }
 
 void Shell::flush() {
-    // TODO Remove all existing files first
-    for (auto iter = root["root"]->fbegin(); iter != root["root"]->fend(); ++iter) {
+    _flush(&root_dir);
+}
+
+void Shell::_flush(const Directory* dir) {
+    for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
         if ("F" == file->get_symbol()) {
             std::string path = mount + "/" + file->get_name();
@@ -102,34 +118,12 @@ void Shell::flush() {
         }
     }
 
-    for (const auto& dir: *(root["root"])) { // Use directory iterator
+    for (const auto& dir: *(dir)) { // Use directory iterator
         const std::string& sym = dir->get_symbol();
         if ("D" == sym) {
-            std::cout << "Flush directory: " << dir->get_name() << std::endl;
-            // TODO Refactor so that flush directories as well.
+            std::cout << "Flush directory: " << dir->get_full_path() << std::endl;
+            FileSystemHandler::create_directory(mount + "/" + dir->get_full_path());
+            _flush(dir);
         }
     }
-
-}
-
-File* Shell::find_file(const std::string& path) {
-    File* file = nullptr;
-    char delimiter = '/';
-    std::string tmp = "";
-    std::vector<std::string> parts;
-
-    // refactor a function
-    std::istringstream iss(path);
-    while(std::getline(iss, tmp, delimiter)) {
-        parts.push_back(tmp);
-    }
-    
-    std::cout << "splitted path: " << std::endl;
-    for (auto &&i : parts)
-    {
-        std::cout << i << ", ";
-    }
-    std::cout << std::endl;
-    
-    return file;
 }

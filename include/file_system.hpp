@@ -9,6 +9,7 @@
 // OS package
 #include <unistd.h> // for symlink
 #include <dirent.h> // for directory search
+#include <sys/stat.h> // directory creation
 
 using std::string;
 using std::vector;
@@ -112,12 +113,33 @@ public:
                 }
             }
         }
-        
         return dirs;
     }
 
+    static void create_directory(const std::string& path){
+
+        // Creating a new directory
+        // TODO Check if already exists
+        if (mkdir(path.c_str(), 0777) == 0) {
+            std::cout << "Directory created successfully." << std::endl;
+        } else {
+            perror("mkdir");
+        }
+    }
+
+    static std::vector<std::string> split_path(const std::string& path) {
+        char delimiter = '/';
+        std::string tmp = "";
+        std::vector<std::string> parts;
+        std::istringstream iss(path);
+        
+        while(std::getline(iss, tmp, delimiter)) {
+            parts.push_back(tmp);
+        }
+
+        return parts;
+    }
+
 };
-
-
 
 #endif
