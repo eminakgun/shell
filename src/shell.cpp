@@ -118,12 +118,12 @@ void Shell::_flush(const Directory* dir) {
         }
     }
 
-    for (const auto& dir: *(dir)) { // Use directory iterator
-        const std::string& sym = dir->get_symbol();
+    for (const auto& subdir: *(dir)) { // Use directory iterator
+        const std::string& sym = subdir->get_symbol();
         if ("D" == sym) {
-            std::cout << "Flush directory: " << dir->get_full_path() << std::endl;
-            FileSystemHandler::create_directory(mount + "/" + dir->get_full_path());
-            _flush(dir);
+            std::cout << "Flush directory: " << subdir->get_full_path() << std::endl;
+            FileSystemHandler::create_directory(mount + "/" + subdir->get_full_path());
+            _flush(subdir);
         }
     }
 }
