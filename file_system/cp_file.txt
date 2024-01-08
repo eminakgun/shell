@@ -1,2 +1,0 @@
-I'm testing cp command.
-This is a test file.
