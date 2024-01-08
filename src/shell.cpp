@@ -46,25 +46,25 @@ void Shell::load_from_directory(Directory* dir) {
     std::string dir_path = dir->get_full_path();
     
     std::cout << "Enter dir: " << dir->get_name() << std::endl;
-    vector<std::string> files = FileSystemHandler::list_files(mount + dir_path);
+    vector<std::string> files = FileSystemHandler::list_files(mount_path + dir_path);
 
     for (const auto &entry : files){
         std::cout << "Allocate file: " << entry << std::endl;
-        std:string content = FileSystemHandler::read_file(mount + dir_path + "/" + entry);
+        std:string content = FileSystemHandler::read_file(mount_path + dir_path + "/" + entry);
         std::cout << "Content: " << content << std::endl;
         File* alloc = memory_manager->allocate_file(entry, content);
         dir->add_file(alloc);
     }
 
-    for (const auto& entry : FileSystemHandler::list_symlink(mount + dir_path)){
+    for (const auto& entry : FileSystemHandler::list_symlink(mount_path + dir_path)){
         std::cout << "Allocate file: " << entry << std::endl;
-        auto content = FileSystemHandler::read_symlink(mount + dir_path + "/" + entry);
+        auto content = FileSystemHandler::read_symlink(mount_path + dir_path + "/" + entry);
         std::cout << "Content: " << content << std::endl;
         File* alloc = memory_manager->allocate_file(entry, content);
         dir->add_file(alloc);
     }
 
-    for (const auto& entry : FileSystemHandler::list_directories(mount + dir_path)){
+    for (const auto& entry : FileSystemHandler::list_directories(mount_path + dir_path)){
         std::cout << "Allocate folder: " << entry << std::endl;
         Directory* alloc = memory_manager->allocate_directory(entry, dir_path + "/" + entry);
         dir->add_subdir(alloc);
@@ -113,8 +113,8 @@ void Shell::_flush(const Directory* dir) {
     for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
         if ("F" == file->get_symbol()) {
-            std::string path = mount + "/" + file->get_name();
-            FileSystemHandler::write_file(file, mount + "/" + file->get_name());
+            std::string path = mount_path + "/" + file->get_name();
+            FileSystemHandler::write_file(file, mount_path + "/" + file->get_name());
         }
     }
 
@@ -122,7 +122,7 @@ void Shell::_flush(const Directory* dir) {
         const std::string& sym = subdir->get_symbol();
         if ("D" == sym) {
             std::cout << "Flush directory: " << subdir->get_full_path() << std::endl;
-            FileSystemHandler::create_directory(mount + "/" + subdir->get_full_path());
+            FileSystemHandler::create_directory(mount_path + "/" + subdir->get_full_path());
             _flush(subdir);
         }
     }
