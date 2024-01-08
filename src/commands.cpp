@@ -41,10 +41,42 @@ void CpCommand::_execute() {
 
     std::cout << "CpCommand current dir: " << current_dir->get_name() << std::endl;
     std::cout << "file content: " << content << std::endl;
+
+    Directory* found_dir = current_dir;
+    auto target = FileSystemHandler::split_path(_dest); // path/to/target
+    std::cout << "target begin: " << *target.begin() << std::endl;
+    if (target.size() > 1) {
+        auto search_dir = current_dir;
+        Directory* target_dir = nullptr;
+        for (auto &dir : target) {
+            std::cout << "1st loop: " << dir << std::endl;
+            std::cout << "1st loop: " << *(target.end()) << std::endl;
+            if (dir == target[target.size()-1]) {
+                // reached last element, it must be the file name
+                break;
+            }
+            
+            std::cout << dir << std::endl;
+            target_dir = nullptr;
+            for (const auto& ddir: *(search_dir)) { // Use directory iterator
+                if (ddir->get_name() == dir) {
+                    target_dir = const_cast<Directory*>(ddir);
+                    search_dir = target_dir;
+                    break;
+                }
+            }
+        }
+        if (target_dir == nullptr) 
+            throw std::invalid_argument("Path not found: " + _dest);
+        
+        found_dir = target_dir;
+    }
     
+    std::cout << "Copying file to path: " << found_dir->get_name() << std::endl;
     // request a file from memory_manager and load it
     File* file = MemoryManager::get()->allocate_file(_dest, content);
-    current_dir->add_file(file);
+    found_dir->add_file(file);
+
 }
 
 // Ls Command
