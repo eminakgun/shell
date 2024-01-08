@@ -13,17 +13,14 @@
 #include "commands.hpp"
 #include "directory.hpp"
 
-//const static std::string mount_path = "/Users/eminakgun/dev/gtu-master/cse241/hw/shell/file_system"; 
 const std::string mount_path = "./file_system";
 class Shell {
 private:
-    //const std::string mount = "/Users/eminakgun/dev/gtu-master/cse241/hw/shell/file_system";
+
     std::map<std::string, Command*> commands;
     MemoryManager* memory_manager;
 
     Directory* current_dir;
-    std::map<std::string, Directory*> root;
-    
     Directory root_dir;
 
     // Functions

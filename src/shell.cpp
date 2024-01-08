@@ -20,11 +20,10 @@ void Shell::boot() {
     // TODO Include date information as well
     
     current_dir = &root_dir;
-    root["root"] = &root_dir;
 
     // Iterate over the files and folders in the disk folder
     // and load it into memory space
-    load_from_directory(root["root"]);
+    load_from_directory(&root_dir);
 
     const char* banner = "===============================\n"
                          "   _____ __         ____\n"
@@ -82,6 +81,8 @@ void Shell::interactive() {
             execute_command(input);
         } catch (const std::invalid_argument& e) {
             std::cerr << "Error: " << e.what() << std::endl;
+            if ("exit -f" == input)
+                exit(0);
         }
     }
 }
