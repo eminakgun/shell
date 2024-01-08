@@ -70,7 +70,7 @@ private:
     void _execute() override;
 
 public:
-    CatCommand();
+    CatCommand(){};
     void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
 
@@ -114,6 +114,13 @@ private:
     void _execute() override;
 public:
     void execute(Shell& shell, const std::vector<std::string>& params) override {_execute();};
+};
+
+class FlushCommand : public Command {
+private:
+    void _execute() override {};
+public:
+    void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
 
 #endif

@@ -10,6 +10,7 @@ Shell::Shell() : root_dir(Directory("root")) {
     commands["link"] = new LinkCommand();
     commands["rm"] = new RmCommand();
     commands["mm"] = new MMCommand();
+    commands["flush"] = new FlushCommand();
     boot();
 }
 
@@ -57,9 +58,9 @@ void Shell::load_from_directory(Directory* dir) {
 
     for (const auto& entry : FileSystemHandler::list_symlink(mount_path + dir_path)){
         std::cout << "Allocate file: " << entry << std::endl;
-        auto content = FileSystemHandler::read_symlink(mount_path + dir_path + "/" + entry);
-        std::cout << "Content: " << content << std::endl;
-        File* alloc = memory_manager->allocate_file(entry, content);
+        auto linked_file_name = FileSystemHandler::read_symlink(mount_path + dir_path + "/" + entry);
+        std::cout << "linked_file_name: " << linked_file_name << std::endl;
+        File* alloc = memory_manager->allocate_symfile(entry, dir->get_file(linked_file_name));
         dir->add_file(alloc);
     }
 
@@ -113,9 +114,13 @@ void Shell::flush() {
 void Shell::_flush(const Directory* dir) {
     for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
+        std::string path = mount_path + "/" + file->get_name();
         if ("F" == file->get_symbol()) {
-            std::string path = mount_path + "/" + file->get_name();
             FileSystemHandler::write_file(file, mount_path + "/" + file->get_name());
+        }
+        else { // SymFile
+            auto link_file = dynamic_cast<SymFile*>(const_cast<File*>(file))->get_link();
+            FileSystemHandler::create_symlink(link_file->get_name(), mount_path + "/" + file->get_name());
         }
     }
 

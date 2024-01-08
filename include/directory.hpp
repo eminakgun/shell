@@ -20,10 +20,14 @@ public:
         : File(name, "D"), full_path(full_path) , parent(nullptr) {symbol = "D";};
     
     void add_file(File* file);
-    void delete_file(File* file);
     void add_subdir(Directory* dir);
+    void delete_file(File* file);
+    void delete_dir(Directory* dir);
+
+
     std::string get_full_path() const {return full_path;}
     Directory* get_parent() {return parent;}
+    File* get_file(std::string& name) const;
 
     // Iterator Interface
     class Iterator {

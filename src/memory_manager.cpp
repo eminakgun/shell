@@ -66,11 +66,10 @@ void MemoryManager::deallocate(File* file) {
     auto it = entries.find(file->get_name());
     if (it != entries.end()) { // file found
         File* f = it->second;
+        total_size -= sizeof(f);
         delete f;
         entries.erase(it);
-        //entries[file->get_name()] = nullptr;
     }
-
 }
 
 void MemoryManager::list_entries() {

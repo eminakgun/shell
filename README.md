@@ -3,10 +3,16 @@
 Basic shell application for learning purposes.
 
 ## TODO
+- [ ] Remove std::couts
 - [ ] Test in ubuntu
-- [ ] Remove from disk immediately
-- [ ] Add symlink tests
+  - [x] partially done
+- [ ] Test size limit
 - [ ] Add namespace
+- [ ] Add template mechanism, maybe FileSystemHandler
 - [ ] Refactor pointers into smart_ptr or shared_ptr
-- [ ] Fix bug in ls -R, it may be due to iterator, dunno
-- [ ] Remove mount path dependency
+- [ ] Remove from disk immediately
+- [x] Remove mount path dependency
+- [ ] Add symlink tests
+- [x] Bug in mkdir, delete when same exists
+- [ ] Add date time information
+- [ ] Add basic file encoding

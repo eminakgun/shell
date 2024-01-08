@@ -69,14 +69,14 @@ private:
     const File* link;
 
 public:
-    SymFile(const std::string& name, const File* link) : File(name), link(link){}
+    SymFile(const std::string& name, const File* link) : File(name), link(link){symbol="L";}
 
     const File* get_link() const {return link;}
 
     // Override
     const std::string& get_name()    const {return name;};
     const std::string& get_date()    const {return link->date;};
-    const std::string& get_symbol()  const {return link->symbol;}
+    const std::string& get_symbol()  const {return symbol;}
     const std::string& get_content() const {return link->content;};
 };
 

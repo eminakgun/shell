@@ -32,8 +32,6 @@ void CpCommand::execute(Shell& shell, const std::vector<std::string>& params) {
 }
 
 void CpCommand::_execute() {
-    // TODO check if source is outside of our file system
-    // check if it exists
     // TODO Add directory copy
 
     std::cout << _src << std::endl;
@@ -44,13 +42,10 @@ void CpCommand::_execute() {
 
     Directory* found_dir = current_dir;
     auto target = FileSystemHandler::split_path(_dest); // path/to/target
-    std::cout << "target begin: " << *target.begin() << std::endl;
     if (target.size() > 1) {
         auto search_dir = current_dir;
         Directory* target_dir = nullptr;
         for (auto &dir : target) {
-            std::cout << "1st loop: " << dir << std::endl;
-            std::cout << "1st loop: " << *(target.end()) << std::endl;
             if (dir == target[target.size()-1]) {
                 // reached last element, it must be the file name
                 break;
@@ -72,17 +67,21 @@ void CpCommand::_execute() {
         found_dir = target_dir;
     }
     
-    std::cout << "Copying file to path: " << found_dir->get_name() << std::endl;
-    // request a file from memory_manager and load it
-    File* file = MemoryManager::get()->allocate_file(_dest, content);
-    found_dir->add_file(file);
-
+    if (found_dir->get_file(_dest) == nullptr) {
+        std::cout << "Copying file to path: " << found_dir->get_name() << std::endl;
+        // request a file from memory_manager and load it
+        File* file = MemoryManager::get()->allocate_file(_dest, content);
+        found_dir->add_file(file);
+    }
+    else {
+        throw std::invalid_argument("Path already exists: " + _dest);
+    }
 }
 
 // Ls Command
 void LsCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     if (params.size() >= 1) {
-        bool recursive = params[0] == "-R";
+        recursive = params[0] == "-R";
     }
     current_dir = shell.get_current_dir();
     _execute();
@@ -101,10 +100,15 @@ void LsCommand::_execute() {
 }
 
 void LsCommand::_list_directory(const Directory* dir) const {
-    std::cout << "_list_directory" << dir->get_name() << std::endl;
+    std::cout << "_list_directory: " << dir->get_name() << std::endl;
     for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
-        std::cout << file->get_symbol() << "  " << file->get_name() << std::endl;
+        std::cout << file->get_symbol() << "  " << file->get_name();
+        if ("L" == file->get_symbol()) {
+            auto link_file = dynamic_cast<SymFile*>(const_cast<File*>(file));
+            std::cout << "-> " << link_file->get_link()->get_name();
+        }
+        std::cout << std::endl;
     }
 
     for (const auto& entry: *dir) {
@@ -119,9 +123,13 @@ void LsCommand::_list_directory(const Directory* dir) const {
     }
 }
 
-// Cat Command
 
-CatCommand::CatCommand() {}
+// Cat Command
+void CatCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    fname = params[0];
+    current_dir = shell.get_current_dir();
+    _execute();
+}
 
 void CatCommand::_execute() {
     File* file = nullptr;
@@ -158,13 +166,8 @@ void CatCommand::_execute() {
     std::cout << std::endl;
 }
 
-void CatCommand::execute(Shell& shell, const std::vector<std::string>& params) {
-    fname = params[0];
-    current_dir = shell.get_current_dir();
-    _execute();
-}
 
-
+// Cd Command
 void CdCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     dname = params[0];
     found_dir = nullptr;
@@ -194,15 +197,21 @@ void CdCommand::_execute() {
         for (auto &dir : target) {
             std::cout << dir << std::endl;
             target_dir = nullptr;
-            for (const auto& ddir: *(search_dir)) { // Use directory iterator
-                if (ddir->get_name() == dir) {
-                    target_dir = const_cast<Directory*>(ddir);
-                    search_dir = target_dir;
-                    break;
+            if (dir == "..") {
+                search_dir = search_dir->get_parent();
+                target_dir = search_dir;
+            } 
+            else {
+                for (const auto& ddir: *(search_dir)) { // Use directory iterator
+                    if (ddir->get_name() == dir) {
+                        target_dir = const_cast<Directory*>(ddir);
+                        search_dir = target_dir;
+                        break;
+                    }
                 }
+                if (target_dir == nullptr) 
+                    break;
             }
-            if (target_dir == nullptr) 
-                break;
             
         }
         found_dir = target_dir;
@@ -243,6 +252,8 @@ void LinkCommand::execute(Shell& shell, const std::vector<std::string>& params){
 };
 
 void LinkCommand::_execute() {
+    // TODO Add hierarchical path search
+
     // Find source file
     File* sfile;
     for (auto iter = current_dir->fbegin(); iter != current_dir->fend(); ++iter) {
@@ -251,9 +262,13 @@ void LinkCommand::_execute() {
             break;
     }
 
-    MemoryManager* mm = MemoryManager::get();
-    auto symfile = mm->allocate_symfile(_dest, sfile);
-    current_dir->add_file(symfile);
+    if (current_dir->get_file(_dest) == nullptr) {
+        MemoryManager* mm = MemoryManager::get();
+        auto symfile = mm->allocate_symfile(_dest, sfile);
+        current_dir->add_file(symfile);
+    }
+    else
+        throw std::invalid_argument("Soft link already exists: " + _dest);
 };
 
 
@@ -264,16 +279,34 @@ void MkdirCommand::execute(Shell& shell, const std::vector<std::string>& params)
 }
 
 void MkdirCommand::_execute() {
-    // TODO Check existence of given dname, delete entry if exists
-    //      immediately remove from disk as well
-    std::string full_path = current_dir->get_full_path();
+    // TODO Add hiearhical path search
+
     MemoryManager* mm = MemoryManager::get();
-    Directory* alloc = mm->allocate_directory(dname, full_path + "/" + dname);
-    current_dir->add_subdir(alloc);
+    Directory* exists = nullptr;
+    for (const auto& dir: *current_dir) { // Use directory iterator
+        if (dname == dir->get_name())
+            exists = const_cast<Directory*>(dir);
+    }
+
+    if (exists) {
+        current_dir->delete_dir(exists);
+        mm->deallocate(exists);
+        // TODO Remove from disk as well
+    }
+    else {
+        std::string full_path = current_dir->get_full_path();
+        Directory* alloc = mm->allocate_directory(dname, full_path + "/" + dname);
+        current_dir->add_subdir(alloc);
+    }
 }
 
 
-// Utility
+// Utilities
+
 void MMCommand::_execute() {
     MemoryManager::get()->list_entries();
 }
+
+void FlushCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    shell.flush();
+};
