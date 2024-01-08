@@ -13,10 +13,14 @@ std::string File::get_timestamp() {
     std::tm* timeInfo = std::localtime(&currentTime);
     
     // Format the date and time
-    std::stringstream ss;
-    ss << std::put_time(timeInfo, "%b %d %H:%M");
+    //std::stringstream ss;
+    //ss << std::put_time(timeInfo, "%b %d %H:%M");
 
-    return ss.str();
+    char timeBuffer[80];
+    std::strftime(timeBuffer, sizeof(timeBuffer), "%b %d %H:%M", timeInfo);
+    return std::string(timeBuffer);
+
+    //return ss.str();
 }
 
 const void File::dump() const {
