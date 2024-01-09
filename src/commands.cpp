@@ -8,15 +8,23 @@ void Command::execute(Shell& shell) {
 }
 
 // Exit Command
+void ExitCommand::execute(Shell& shell, const std::vector<std::string>& params) {
+    flush = true;
+    if (params.size() > 1) {
+        if (params[1] != "-f")
+            flush = false;
+    }
+    
+    if (flush)
+        shell.flush();
+    _execute();
+}
+
 void ExitCommand::_execute() {
     std::cout << "Exiting the shell." << std::endl;
     exit(0);
 }
 
-void ExitCommand::execute(Shell& shell, const std::vector<std::string>& params) {
-    shell.flush();
-    _execute();
-}
 
 // Cp Command
 CpCommand::CpCommand(){}
@@ -24,10 +32,11 @@ CpCommand::CpCommand(std::string src, std::string dest) : _src(src), _dest(dest)
 
 void CpCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     // Copy
-    _src = mount_path + "/" + params[0];
+    //_src = mount_path + "/" + params[0];
+    _src = params[0];
     _dest = params[1];
     current_dir = shell.get_current_dir();
-    std::cout << "Current dir: " << shell.get_current_dir()->get_name() << std::endl;
+    //std::cout << "Current dir: " << shell.get_current_dir()->get_name() << std::endl;
     _execute();
 }
 
@@ -35,43 +44,36 @@ void CpCommand::_execute() {
     // TODO Add directory copy
 
     std::cout << _src << std::endl;
-    std::string content = FileSystemHandler::read_file(_src);
-
-    std::cout << "CpCommand current dir: " << current_dir->get_name() << std::endl;
-    std::cout << "file content: " << content << std::endl;
-
-    Directory* found_dir = current_dir;
-    auto target = FileSystemHandler::split_path(_dest); // path/to/target
-    if (target.size() > 1) {
-        auto search_dir = current_dir;
-        Directory* target_dir = nullptr;
-        for (auto &dir : target) {
-            if (dir == target[target.size()-1]) {
-                // reached last element, it must be the file name
-                break;
-            }
-            
-            std::cout << dir << std::endl;
-            target_dir = nullptr;
-            for (const auto& ddir: *(search_dir)) { // Use directory iterator
-                if (ddir->get_name() == dir) {
-                    target_dir = const_cast<Directory*>(ddir);
-                    search_dir = target_dir;
-                    break;
-                }
-            }
-        }
-        if (target_dir == nullptr) 
-            throw std::invalid_argument("Path not found: " + _dest);
-        
-        found_dir = target_dir;
+    std::string content;
+    if (current_dir->get_name() == "root" && 
+            FileSystemHandler::split_path(_src)[0] == "..") {
+        /* Means we need to access outside of our mount point */
+        _src = mount_path + "/" + _src;
+        content = FileSystemHandler::read_file(_src);
     }
+    else {
+        std::pair<Directory*, File*> deepest = Directory::get_deepest(current_dir, _src);
+        if (deepest.second == nullptr)
+            throw std::invalid_argument("Path not found: " + _src);
+        content = deepest.second->get_content();
+        
+    }
+
+    //std::cout << "CpCommand current dir: " << current_dir->get_name() << std::endl;
+    //std::cout << "file content: " << content << std::endl;
+
+    // TODO Refactor recursive path search into a function, 
+    //      return deepest directory and file name
+
+    std::vector<std::string> path = FileSystemHandler::split_path(_dest);
+    std::string dest_name = path[path.size()-1];
+    std::pair<Directory*, File*> dest_deepest = Directory::get_deepest(current_dir, _dest);
     
-    if (found_dir->get_file(_dest) == nullptr) {
-        std::cout << "Copying file to path: " << found_dir->get_name() << std::endl;
+    if (dest_deepest.second == nullptr) {
+        std::cout << "Copying file to path: " << dest_deepest.first->get_name() << std::endl;
         // request a file from memory_manager and load it
-        File* file = MemoryManager::get()->allocate_file(_dest, content);
-        found_dir->add_file(file);
+        File* file = MemoryManager::get()->allocate_file(dest_name, content);
+        dest_deepest.first->add_file(file);
     }
     else {
         throw std::invalid_argument("Path already exists: " + _dest);
@@ -100,7 +102,7 @@ void LsCommand::_execute() {
 }
 
 void LsCommand::_list_directory(const Directory* dir) const {
-    std::cout << "_list_directory: " << dir->get_name() << std::endl;
+    //std::cout << "_list_directory: " << dir->get_name() << std::endl;
     for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
         std::cout << file->get_symbol() << "  " << file->get_name();
@@ -132,11 +134,42 @@ void CatCommand::execute(Shell& shell, const std::vector<std::string>& params) {
 }
 
 void CatCommand::_execute() {
-    File* file = nullptr;
 
-    std::cout << "search dir: " << current_dir->get_full_path() << std::endl;
-    std::cout << "search name: " << fname << std::endl;
-    for (auto iter = current_dir->fbegin(); iter != current_dir->fend(); ++iter) {
+    //std::cout << "search dir: " << current_dir->get_full_path() << std::endl;
+    //std::cout << "search name: " << fname << std::endl;
+
+    Directory* found_dir = current_dir;
+    auto target = FileSystemHandler::split_path(fname); // path/to/target
+    if (target.size() > 1) {
+        auto search_dir = current_dir;
+        Directory* target_dir = nullptr;
+        for (auto &dir : target) {
+            if (dir == target[target.size()-1]) {
+                // reached last element, it must be the file name
+                fname = dir;
+                break;
+            }
+            
+            target_dir = nullptr;
+            for (const auto& ddir: *(search_dir)) { // Use directory iterator
+                if (ddir->get_name() == dir) {
+                    target_dir = const_cast<Directory*>(ddir);
+                    search_dir = target_dir;
+                    break;
+                }
+            }
+        }
+        found_dir = target_dir;
+    }
+
+    if (found_dir == nullptr) // In case of hierarchical path
+            throw std::invalid_argument("Path not found: " + fname);
+
+    //std::cout << found_dir->get_name() << std::endl;
+
+    // now search file
+    File* file = nullptr;
+    for (auto iter = found_dir->fbegin(); iter != found_dir->fend(); ++iter) {
         auto cfile = *iter;
         if (cfile->get_name() == fname) {
             file = const_cast<File*>(cfile);
@@ -144,21 +177,21 @@ void CatCommand::_execute() {
         }
     }
 
-    if (file == nullptr){
+    if (file == nullptr)
         throw std::invalid_argument("File not found: " + fname);
-    }
     else
         std::cout << "Cat file: " << file->get_name() << std::endl;
 
+    // Dump file content
     auto sym_file = dynamic_cast<const SymFile*>(file);
-    if (sym_file != nullptr) {
+    if (sym_file != nullptr) { // link file
         auto link = sym_file->get_link();
         if (link != nullptr){
             for (const auto &i : *link)
                 std::cout << i;
         }
     }
-    else {
+    else { // regular file
         for (auto it = file->begin(); it != file->end(); ++it)
             std::cout << *it;
     }
@@ -195,7 +228,7 @@ void CdCommand::_execute() {
         auto search_dir = current_dir;
         Directory* target_dir = nullptr;
         for (auto &dir : target) {
-            std::cout << dir << std::endl;
+            //std::cout << dir << std::endl;
             target_dir = nullptr;
             if (dir == "..") {
                 search_dir = search_dir->get_parent();
@@ -219,7 +252,7 @@ void CdCommand::_execute() {
         if (found_dir == nullptr){
             throw std::invalid_argument("Directory not found: " + dname);
         } else
-            std::cout << "Cd file: " << found_dir->get_name() << std::endl;
+            std::cout << "Change directory: " << found_dir->get_name() << std::endl;
     }
 }
 

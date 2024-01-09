@@ -57,8 +57,8 @@ Directory* MemoryManager::allocate_directory(const std::string& name, const std:
 
     // update allocated memory size
     total_size += sizeof(dir);
-    std::cout << "Directory size: " << sizeof(dir) << std::endl;
-    std::cout << "Total size: " << total_size << std::endl;
+    //std::cout << "Directory size: " << sizeof(dir) << std::endl;
+    //std::cout << "Total size: " << total_size << std::endl;
     return dir;   
 }
 

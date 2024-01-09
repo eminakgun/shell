@@ -30,6 +30,7 @@ public:
 class ExitCommand : public Command {
 private:
     void _execute() override;
+    bool flush;
 
 public:
     void execute(Shell& shell, const std::vector<std::string>& params) override;
