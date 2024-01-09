@@ -43,7 +43,7 @@ File* Directory::get_file(std::string& name) const {
 std::pair<Directory*, File*> Directory::get_deepest(Directory* current_dir, std::string& path) {
     Directory* found_dir = current_dir;
     std::string fname = path;
-    auto target = FileSystemHandler::split_path(path); // path/to/target
+    auto target = fs.split_path(path); // path/to/target
     if (target.size() > 1) {
         auto search_dir = current_dir;
         Directory* target_dir = nullptr;

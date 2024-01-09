@@ -43,17 +43,16 @@ void CpCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     //std::cout << "Current dir: " << shell.get_current_dir()->get_name() << std::endl;
     _execute();
 }
-
+        
 void CpCommand::_execute() {
     // TODO Add directory copy
-
     std::cout << _src << std::endl;
     std::string content;
     if (current_dir->get_name() == "root" && 
-            FileSystemHandler::split_path(_src)[0] == "..") {
+            fs.split_path(_src)[0] == "..") {
         /* Means we need to access outside of our mount point */
         _src = mount_path + "/" + _src;
-        content = FileSystemHandler::read_file(_src);
+        content = fs.api.read_file(_src);
     }
     else {
         std::pair<Directory*, File*> deepest = Directory::get_deepest(current_dir, _src);
@@ -69,7 +68,7 @@ void CpCommand::_execute() {
     // TODO Refactor recursive path search into a function, 
     //      return deepest directory and file name
 
-    std::vector<std::string> path = FileSystemHandler::split_path(_dest);
+    std::vector<std::string> path = fs.split_path(_dest);
     std::string dest_name = path[path.size()-1];
     std::pair<Directory*, File*> dest_deepest = Directory::get_deepest(current_dir, _dest);
     
@@ -143,7 +142,7 @@ void CatCommand::_execute() {
     //std::cout << "search name: " << fname << std::endl;
 
     Directory* found_dir = current_dir;
-    auto target = FileSystemHandler::split_path(fname); // path/to/target
+    auto target = fs.split_path(fname); // path/to/target
     if (target.size() > 1) {
         auto search_dir = current_dir;
         Directory* target_dir = nullptr;
@@ -228,7 +227,7 @@ void CdCommand::_execute() {
         found_dir = current_dir->get_parent();
     }
     else {
-        auto target = FileSystemHandler::split_path(dname); // path/to/target
+        auto target = fs.split_path(dname); // path/to/target
         auto search_dir = current_dir;
         Directory* target_dir = nullptr;
         for (auto &dir : target) {

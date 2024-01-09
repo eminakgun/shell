@@ -15,12 +15,11 @@
 
 namespace shell {
 
-const std::string mount_path = "./file_system";
-//const static std::string mount_path = "/Users/eminakgun/dev/gtu-master/cse241/hw/shell/file_system"; 
+//const std::string mount_path = "./file_system";
+const static std::string mount_path = "/Users/eminakgun/dev/gtu-master/cse241/hw/shell/file_system"; 
 
 class Shell {
 private:
-
     std::map<std::string, Command*> commands;
     MemoryManager* memory_manager;
 

@@ -48,25 +48,25 @@ void Shell::load_from_directory(Directory* dir) {
     std::string dir_path = dir->get_full_path();
     
     std::cout << "Enter dir: " << dir->get_name() << std::endl;
-    vector<std::string> files = FileSystemHandler::list_files(mount_path + dir_path);
+    vector<std::string> files = fs.api.list_files(mount_path + dir_path);
 
     for (const auto &entry : files){
         std::cout << "Allocate file: " << entry << std::endl;
-        std:string content = FileSystemHandler::read_file(mount_path + dir_path + "/" + entry);
+        std:string content = fs.api.read_file(mount_path + dir_path + "/" + entry);
         std::cout << "Content: " << content << std::endl;
         File* alloc = memory_manager->allocate_file(entry, content);
         dir->add_file(alloc);
     }
 
-    for (const auto& entry : FileSystemHandler::list_symlink(mount_path + dir_path)){
+    for (const auto& entry : fs.api.list_symlink(mount_path + dir_path)){
         std::cout << "Allocate file: " << entry << std::endl;
-        auto linked_file_name = FileSystemHandler::read_symlink(mount_path + dir_path + "/" + entry);
+        auto linked_file_name = fs.api.read_symlink(mount_path + dir_path + "/" + entry);
         std::cout << "linked_file_name: " << linked_file_name << std::endl;
         File* alloc = memory_manager->allocate_symfile(entry, dir->get_file(linked_file_name));
         dir->add_file(alloc);
     }
 
-    for (const auto& entry : FileSystemHandler::list_directories(mount_path + dir_path)){
+    for (const auto& entry : fs.api.list_directories(mount_path + dir_path)){
         std::cout << "Allocate folder: " << entry << std::endl;
         Directory* alloc = memory_manager->allocate_directory(entry, dir_path + "/" + entry);
         dir->add_subdir(alloc);
@@ -119,11 +119,11 @@ void Shell::_flush(const Directory* dir) {
         std::string path = mount_path + dir->get_full_path() + "/" + file->get_name();
         std::cout << "Full file path: " << path << std::endl;
         if ("F" == file->get_symbol()) {
-            FileSystemHandler::write_file(file, path);
+            fs.api.write_file(file, path);
         }
         else { // SymFile
             auto link_file = dynamic_cast<SymFile*>(const_cast<File*>(file))->get_link();
-            FileSystemHandler::create_symlink(link_file->get_name(), path);
+            fs.api.create_symlink(link_file->get_name(), path);
         }
     }
 
@@ -131,7 +131,7 @@ void Shell::_flush(const Directory* dir) {
         const std::string& sym = subdir->get_symbol();
         if ("D" == sym) {
             std::cout << "Flush directory: " << subdir->get_full_path() << std::endl;
-            FileSystemHandler::create_directory(mount_path + "/" + subdir->get_full_path());
+            fs.api.create_directory(mount_path + "/" + subdir->get_full_path());
             _flush(subdir);
         }
     }
