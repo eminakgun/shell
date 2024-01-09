@@ -1,4 +1,6 @@
 #include "memory_manager.hpp"
+#include <system_error>
+
 
 namespace shell {
 
@@ -25,18 +27,24 @@ MemoryManager* MemoryManager::get() {
 }
 
 File* MemoryManager::allocate_file(const std::string& name, const std::string& content) {
-    // TODO check existence of the same file
     File* new_file = nullptr;
-    if (can_allocate(content.size())) {
-        // create file object
-        new_file = new File(name, content);
+    auto it = entries.find(name);
+    if (it == entries.end()) { // entry not found
+        if (can_allocate(content.size())) {
+            // create file object
+            new_file = new File(name, content);
 
-        // push it to our memory array
-        entries[name] = new_file;
+            // push it to our memory array
+            entries[name] = new_file;
 
-        // update allocated memory size
-        total_size += new_file->size();
-        std::cout << "Total size: " << total_size << std::endl;
+            // update allocated memory size
+            total_size += new_file->size();
+            std::cout << "Total size: " << total_size << std::endl;
+        }
+        else {
+            throw std::system_error(std::make_error_code(std::errc::not_enough_memory),
+                                    "Reached 10MB capacity!! Delete some file first");
+        }
     }
     return new_file;
 }
@@ -50,17 +58,19 @@ File* MemoryManager::allocate_symfile(const std::string& name, const File* link)
 }
 
 Directory* MemoryManager::allocate_directory(const std::string& name, const std::string& path) {
-    // TODO check existence of the same directory?
+    Directory* dir = nullptr;
+    auto it = entries.find(name);
+    if (it == entries.end()) { // entry not found
+        // create directory object
+        dir = new Directory(name, path);
 
-    // create directory object
-    Directory* dir = new Directory(name, path);
+        entries[name] = dir;
 
-    entries[name] = dir;
-
-    // update allocated memory size
-    total_size += sizeof(dir);
-    //std::cout << "Directory size: " << sizeof(dir) << std::endl;
-    //std::cout << "Total size: " << total_size << std::endl;
+        // update allocated memory size
+        total_size += sizeof(dir);
+        //std::cout << "Directory size: " << sizeof(dir) << std::endl;
+        //std::cout << "Total size: " << total_size << std::endl;
+    }
     return dir;   
 }
 
