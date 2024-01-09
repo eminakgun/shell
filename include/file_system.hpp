@@ -40,7 +40,7 @@ public:
         return content;
     }
 
-    static void write_file(const File* file, const string&& file_path) {
+    static void write_file(const File* file, const string& file_path) {
         std::ofstream ofs(file_path);
         if (!ofs.is_open()) {
             throw std::invalid_argument("Error opening input file: " + file_path);
@@ -52,6 +52,7 @@ public:
     }
 
     static void create_symlink(const string& src, const string& target) {
+        std::cout << "Link src: " << src << "target" << target << std::endl;
         symlink(src.c_str(), target.c_str());
     }
     
