@@ -4,6 +4,7 @@
 #include <vector>
 
 #include "file.hpp"
+#include "file_system.hpp"
 
 class Directory : public File
 {
@@ -28,6 +29,7 @@ public:
     std::string get_full_path() const {return full_path;}
     Directory* get_parent() {return parent;}
     File* get_file(std::string& name) const;
+    static std::pair<Directory*, File*> get_deepest(Directory* current_dir, std::string& path);
 
     // Iterator Interface
     class Iterator {
@@ -90,6 +92,7 @@ public:
     FileIterator fend() const {
         return FileIterator(files.end());
     }
+
 };
 
 #endif
