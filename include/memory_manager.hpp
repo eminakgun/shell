@@ -11,7 +11,7 @@
 
 namespace shell {
 
-const size_t SIZE_10MB = 1024*1024*10;
+const size_t SIZE_10MB = 1024*1024;
 
 class MemoryManager {
 private:    

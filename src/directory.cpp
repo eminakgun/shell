@@ -10,6 +10,7 @@ void Directory::delete_file(File* file) {
     for (auto it = files.begin(); it != files.end(); ++it) {
         if ((*it) == file) {
             files.erase(it);  // Erase the file from the vector
+            break;
         }
     }
 }

@@ -1,6 +1,8 @@
 #include "commands.hpp"
 #include "shell.hpp"
 
+#include <unistd.h>
+
 namespace shell {
 
 // Command Implementations
@@ -263,7 +265,10 @@ void RmCommand::execute(Shell& shell, const std::vector<std::string>& params){
     current_dir = shell.get_current_dir();
     _execute();
 }
+
 void RmCommand::_execute(){
+    // TODO Add hierarchical path search
+
     // delete the given file in current directory
     File* file;
     for (auto iter = current_dir->fbegin(); iter != current_dir->fend(); ++iter) {
@@ -274,11 +279,13 @@ void RmCommand::_execute(){
         }
     }
     current_dir->delete_file(file);
-    MemoryManager::get()->deallocate(file);
-    // TODO immediately remove from disk as well
+    std::string hard_path = mount_path + current_dir->get_full_path() + "/" + file->get_name();
+    unlink(hard_path.c_str()); // TODO move into FileSystemHandler
+    MemoryManager::get()->deallocate(file);  
 }
 
 
+// Link Command
 void LinkCommand::execute(Shell& shell, const std::vector<std::string>& params){
     _src = params[0];
     _dest = params[1];
@@ -325,8 +332,9 @@ void MkdirCommand::_execute() {
 
     if (exists) {
         current_dir->delete_dir(exists);
+        std::string hard_path = mount_path + "/" + exists->get_full_path();
+        rmdir(hard_path.c_str()); // TODO move into FileSystemHandler
         mm->deallocate(exists);
-        // TODO Remove from disk as well
     }
     else {
         std::string full_path = current_dir->get_full_path();
