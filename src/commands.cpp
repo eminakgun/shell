@@ -15,7 +15,7 @@ void Command::execute(Shell& shell) {
 void ExitCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     flush = true;
     if (params.size() >= 1) {
-        if (params[1] != "-f")
+        if (params[0] == "-f")
             flush = false;
     }
     
