@@ -99,7 +99,7 @@ void Shell::execute_command(Command& cmd) {
 void Shell::execute_command(const std::string& input) {
     auto parsed_cmd = CommandParser::parse(input);
     auto it = commands.find(parsed_cmd.first); // get iterator
-    std::cout << current_dir->get_name() << " > " << input << std::endl;
+    //std::cout << current_dir->get_name() << " > " << input << std::endl;
     if (it != commands.end() && it->second != nullptr) {            
         it->second->execute(*this, parsed_cmd.second);
     } else {
@@ -114,13 +114,14 @@ void Shell::flush() {
 void Shell::_flush(const Directory* dir) {
     for (auto iter = dir->fbegin(); iter != dir->fend(); ++iter) {
         auto file = *iter;
-        std::string path = mount_path + "/" + file->get_name();
+        std::string path = mount_path + dir->get_full_path() + "/" + file->get_name();
+        std::cout << "Full file path: " << path << std::endl;
         if ("F" == file->get_symbol()) {
-            FileSystemHandler::write_file(file, mount_path + "/" + file->get_name());
+            FileSystemHandler::write_file(file, path);
         }
         else { // SymFile
             auto link_file = dynamic_cast<SymFile*>(const_cast<File*>(file))->get_link();
-            FileSystemHandler::create_symlink(link_file->get_name(), mount_path + "/" + file->get_name());
+            FileSystemHandler::create_symlink(link_file->get_name(), path);
         }
     }
 
@@ -133,3 +134,4 @@ void Shell::_flush(const Directory* dir) {
         }
     }
 }
+
