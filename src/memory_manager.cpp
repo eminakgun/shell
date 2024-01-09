@@ -1,5 +1,7 @@
 #include "memory_manager.hpp"
 
+namespace shell {
+
 // static initialization
 MemoryManager* MemoryManager::instance = nullptr;
 
@@ -81,3 +83,5 @@ void MemoryManager::list_entries() {
                   << file->get_name() << std::endl;
     }
 }
+
+} // namespace

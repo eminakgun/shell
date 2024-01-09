@@ -1,5 +1,7 @@
 #include "directory.hpp"
 
+namespace shell {
+
 void Directory::add_file(File* file) {
     files.push_back(file);
 }
@@ -73,3 +75,5 @@ std::pair<Directory*, File*> Directory::get_deepest(Directory* current_dir, std:
     
     return std::make_pair(found_dir, found_dir->get_file(fname));
 }
+
+} // namespace

@@ -1,5 +1,7 @@
 #include "shell.hpp"
 
+namespace shell {
+
 Shell::Shell() : root_dir(Directory("root")) {
     commands["exit"] = new ExitCommand();
     commands["cp"] = new CpCommand();
@@ -135,3 +137,4 @@ void Shell::_flush(const Directory* dir) {
     }
 }
 
+} // namespace

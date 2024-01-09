@@ -1,5 +1,7 @@
 #include "file.hpp"
 
+namespace shell {
+
 File::File(const std::string& name) 
             : symbol("F"), name(name), date(get_timestamp()), content("") {}
 
@@ -33,3 +35,5 @@ std::ostream& operator<<(std::ostream& os, const File& f) {
         << f.date << "    " << f.content.size();
     return os;
 }
+
+} // namespace

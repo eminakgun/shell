@@ -5,6 +5,9 @@
 #include <fstream>
 #include <sstream>
 #include <ctime>
+
+namespace shell {
+
 // Abstract base class
 class File {
 protected:
@@ -79,5 +82,7 @@ public:
     const std::string& get_symbol()  const {return symbol;}
     const std::string& get_content() const {return link->content;};
 };
+
+} // namespace
 
 #endif

@@ -9,6 +9,8 @@
 #include "file.hpp"
 #include "directory.hpp"
 
+namespace shell {
+
 const size_t SIZE_10MB = 1024*1024*10;
 
 class MemoryManager {
@@ -34,5 +36,7 @@ public:
     Directory*   allocate_directory(const std::string& name, const std::string& path);
     void         deallocate(File* file);
 };
+
+} // namespace
 
 #endif

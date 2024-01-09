@@ -1,6 +1,8 @@
 #include "commands.hpp"
 #include "shell.hpp"
 
+namespace shell {
+
 // Command Implementations
 void Command::execute(Shell& shell) {
     current_dir = shell.get_current_dir();
@@ -10,7 +12,7 @@ void Command::execute(Shell& shell) {
 // Exit Command
 void ExitCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     flush = true;
-    if (params.size() > 1) {
+    if (params.size() >= 1) {
         if (params[1] != "-f")
             flush = false;
     }
@@ -342,4 +344,6 @@ void MMCommand::_execute() {
 
 void FlushCommand::execute(Shell& shell, const std::vector<std::string>& params) {
     shell.flush();
-};
+}
+
+} // namespace

@@ -16,6 +16,7 @@ using std::vector;
 
 #include "file.hpp"
 
+namespace shell {
 
 // TODO
 // - move func implementations to .cpp file
@@ -142,5 +143,7 @@ public:
     }
 
 };
+
+} // namespace
 
 #endif

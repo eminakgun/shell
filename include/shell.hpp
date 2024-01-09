@@ -13,6 +13,7 @@
 #include "commands.hpp"
 #include "directory.hpp"
 
+namespace shell {
 
 const std::string mount_path = "./file_system";
 //const static std::string mount_path = "/Users/eminakgun/dev/gtu-master/cse241/hw/shell/file_system"; 
@@ -45,5 +46,7 @@ public:
 
     friend class Command;
 };
+
+} // namespace
 
 #endif

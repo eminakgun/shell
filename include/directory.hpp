@@ -6,6 +6,8 @@
 #include "file.hpp"
 #include "file_system.hpp"
 
+namespace shell {
+
 class Directory : public File
 {
 private:
@@ -94,5 +96,7 @@ public:
     }
 
 };
+
+} // namespace
 
 #endif

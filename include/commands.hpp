@@ -1,5 +1,5 @@
-#ifndef COMMANDS_H
-#define COMMANDS_H
+#ifndef COMMANDS_HPP
+#define COMMANDS_HPP
 
 #include <iostream>
 #include <fstream>
@@ -9,6 +9,8 @@
 #include "memory_manager.hpp"
 #include "file_system.hpp"
 //#include "shell.hpp"
+
+namespace shell {
 
 class Shell; // forward declaration
 
@@ -123,5 +125,7 @@ private:
 public:
     void execute(Shell& shell, const std::vector<std::string>& params) override;
 };
+
+} // namespace
 
 #endif

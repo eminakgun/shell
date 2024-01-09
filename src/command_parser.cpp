@@ -1,5 +1,6 @@
 #include "command_parser.hpp"
 
+namespace shell {
 
 ParsedCmd CommandParser::parse(const std::string& input) {
     std::istringstream iss(input);
@@ -14,3 +15,5 @@ ParsedCmd CommandParser::parse(const std::string& input) {
 
     return std::make_pair(command, parameters);
 }
+
+} // namespace

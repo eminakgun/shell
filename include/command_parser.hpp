@@ -3,8 +3,10 @@
 #include <vector>
 #include <sstream>
 
-#ifndef COMMAND_PARSER_H
-#define COMMAND_PARSER_H
+#ifndef COMMAND_PARSER_HPP
+#define COMMAND_PARSER_HPP
+
+namespace shell {
 
 typedef std::pair<std::string, std::vector<std::string>> ParsedCmd;
 
@@ -15,5 +17,7 @@ public:
     // based on passed input string
     static ParsedCmd parse(const std::string& input);
 };
+
+} // namespace
 
 #endif
