@@ -18,16 +18,8 @@ using std::vector;
 
 namespace shell {
 
-// TODO
-// - move func implementations to .cpp file
-// - further replace with my own file I/O
-
-// FileSystemHandler class provides the interface
-// for directory/file operations such as reading/writing
-// Currently uses regular OS tasks
-class FileSystemHandler {
+class POSIX_API {
 public:
-
     static string read_file(const string& file_path) {
         std::ifstream src_file(file_path);
         if (!src_file.is_open()) {
@@ -128,6 +120,19 @@ public:
             perror("mkdir");
         }
     }
+};
+
+// TODO
+// - move func implementations to .cpp file
+// - further replace with my own file I/O
+
+// FileSystemHandler class provides the interface
+// for directory/file operations such as reading/writing
+// Currently uses regular OS tasks
+template<class T>
+class FileSystemHandler {
+public:
+    static T api;
 
     static std::vector<std::string> split_path(const std::string& path) {
         char delimiter = '/';
@@ -143,6 +148,11 @@ public:
     }
 
 };
+
+template<class T>
+T FileSystemHandler<T>::api;
+
+static FileSystemHandler<POSIX_API> fs;
 
 } // namespace
 

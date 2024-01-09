@@ -8,7 +8,6 @@
 // user includes
 #include "memory_manager.hpp"
 #include "file_system.hpp"
-//#include "shell.hpp"
 
 namespace shell {
 
