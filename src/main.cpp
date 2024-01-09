@@ -11,7 +11,7 @@ int main(int argc, char *argv[]) {
     if (argc == 2) {
         utest = static_cast<string>(argv[1]) == "utest";
     }
-    
+
     if (utest) {
         // test outward copy
         shell_app.execute_command("cd test_dir");
@@ -24,8 +24,9 @@ int main(int argc, char *argv[]) {
         // copy file from outside of filesystem
         shell_app.execute_command("cp ../sample_file.txt sample_file.txt");
 
-        // duplicate file in the same folder
+        // duplicate file in the same folder and remove
         shell_app.execute_command("cp some_file.txt some_new_file.txt");
+        shell_app.execute_command("rm some_new_file.txt");
 
         shell_app.execute_command("mkdir some_dir");
 
@@ -54,7 +55,15 @@ int main(int argc, char *argv[]) {
         shell_app.execute_command("cd ../..");
         shell_app.execute_command("ls -R");
 
-        // TODO Test size limit
+        // Test size limit
+        /*
+        while (1) {
+            static int i = 0;
+            std::string fname = "sample_file_" + std::to_string(i) + ".txt";
+            shell_app.execute_command("cp ../sample_file.txt " + fname);
+            ++i;
+        }
+        */
     }
 
     // Run the interactive shell_app
